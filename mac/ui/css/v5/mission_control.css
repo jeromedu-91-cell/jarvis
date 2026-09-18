@@ -1,0 +1,501 @@
+/* ==========================================================================
+   JARVIS_SPATIAL_OS_V5 — mission_control.css
+   Panneau MISSION CONTROL. Même géométrie que le Kanban courrier : il occupe
+   la bande de travail (rail → gouttière droite) via --v5rail / --v5right, la
+   seule position qui garantit qu'il ne passe ni sous l'aperçu navigateur ni
+   sous l'Analysis Workspace.
+   ========================================================================== */
+
+.v5-mc{position:fixed;left:var(--v5rail);right:var(--v5right);top:56px;
+  bottom:calc(22px + var(--cmdh,56px) + 18px);z-index:62;
+  display:flex;flex-direction:column;gap:10px;
+  /* Fond PLEIN : Mission Control se superpose a la page de travail (code,
+     analyses...). Sans ce calque, le texte de la page dessous transparaissait
+     a travers le panneau et les deux se melangeaient a l'ecran. */
+  padding:14px 16px;border-radius:14px;
+  background:linear-gradient(180deg,rgba(4,15,25,.94),rgba(2,8,14,.92));
+  backdrop-filter:blur(22px);
+  box-shadow:inset 0 0 0 1px rgba(120,200,230,.12), 0 30px 80px -30px rgba(0,0,0,.9);
+  opacity:0;transform:translateY(12px);filter:blur(6px);pointer-events:none;
+  transition:opacity .42s ease, transform .5s cubic-bezier(.16,.9,.3,1), filter .42s ease}
+.v5-mc.in{opacity:1;transform:none;filter:none;pointer-events:auto}
+.v5-mc[hidden]{display:none!important}
+
+/* ------------------------------------------------------------------ entête */
+.mc-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;padding-bottom:9px;
+  box-shadow:inset 0 -1px 0 rgba(120,200,230,.1)}
+.mc-kick{font-family:var(--mono5);font-size:8.5px;letter-spacing:.24em;color:var(--faint)}
+.mc-head h2{margin:0;font-size:17px;font-weight:250;letter-spacing:-.01em;color:var(--ink);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:46vw}
+.mc-live{margin-left:auto;font-family:var(--mono5);font-size:8px;letter-spacing:.2em;
+  color:var(--ok5);padding:4px 9px;border-radius:6px;background:rgba(61,240,166,.08)}
+.mc-live[data-off='1']{color:var(--err5);background:rgba(255,91,110,.09)}
+.mc-close{border:0;background:none;color:var(--faint);font-size:13px;cursor:pointer;padding:4px}
+.mc-close:hover{color:var(--cy)}
+
+/* -------------------------------------------------------------- structure */
+.mc-body{flex:1;min-height:0;display:grid;grid-template-columns:212px minmax(0,1fr);gap:12px}
+.mc-empty{grid-column:1/-1;align-self:center;justify-self:center;margin:0;max-width:440px;
+  text-align:center;color:var(--faint);font-family:var(--mono5);font-size:11px;line-height:1.8}
+.mc-empty[hidden]{display:none!important}
+.mc-none{margin:0;color:var(--faint);font-family:var(--mono5);font-size:10px;line-height:1.7}
+.mc-none[hidden]{display:none!important}
+.mc-label{font-family:var(--mono5);font-size:8px;letter-spacing:.24em;color:var(--faint);
+  display:flex;align-items:baseline;gap:9px;margin:2px 0 7px}
+.mc-label em{font-style:normal;color:var(--mute);letter-spacing:.12em}
+
+/* ---------------------------------------------------- colonne des missions */
+.mc-side{display:flex;flex-direction:column;min-height:0;border-radius:12px;
+  background:var(--glass5);backdrop-filter:blur(10px);box-shadow:var(--edge5)}
+.mc-side-head{font-family:var(--mono5);font-size:8px;letter-spacing:.24em;color:var(--faint);
+  padding:10px 12px;box-shadow:inset 0 -1px 0 rgba(120,200,230,.08)}
+.mc-list{flex:1;min-height:0;overflow-y:auto;padding:7px;display:flex;flex-direction:column;gap:5px;
+  scrollbar-width:thin;scrollbar-color:rgba(56,223,255,.18) transparent}
+.mc-list::-webkit-scrollbar{width:6px}
+.mc-list::-webkit-scrollbar-thumb{background:rgba(56,223,255,.18);border-radius:3px}
+.mc-row{display:grid;grid-template-columns:1fr auto;gap:2px 8px;text-align:left;cursor:pointer;
+  border:0;border-left:2px solid transparent;border-radius:8px;padding:8px 9px;
+  background:rgba(120,200,230,.04);transition:background .18s,border-color .18s}
+.mc-row:hover{background:rgba(56,223,255,.1)}
+.mc-row[data-on='1']{background:rgba(56,223,255,.13)}
+.mc-row[data-pin='1']{border-left-color:var(--cy)}
+.mc-row b{grid-column:1;font-size:11.5px;font-weight:400;color:var(--ink);line-height:1.35;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.mc-row em{grid-column:1;font-style:normal;font-family:var(--mono5);font-size:8px;
+  letter-spacing:.16em;color:var(--mute)}
+.mc-row span{grid-row:1/3;grid-column:2;align-self:center;font-family:var(--mono5);
+  font-size:9.5px;color:var(--faint)}
+.mc-row[data-tone='run'] em,.mc-row[data-tone='tool'] em,
+.mc-row[data-tone='think'] em,.mc-row[data-tone='check'] em{color:var(--cy)}
+.mc-row[data-tone='ok'] em{color:var(--ok5)}
+.mc-row[data-tone='err'] em{color:var(--err5)}
+.mc-row[data-tone='wait'] em{color:var(--amber)}
+
+/* -------------------------------------------------------- colonne centrale */
+.mc-main{display:flex;flex-direction:column;gap:10px;min-height:0}
+.mc-main[hidden]{display:none!important}
+
+.mc-top{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:14px;align-items:center;
+  padding:11px 14px;border-radius:12px;background:var(--glass5);box-shadow:var(--edge5)}
+.mc-top .k{display:block;font-family:var(--mono5);font-size:8px;letter-spacing:.24em;color:var(--faint)}
+.mc-agent b{display:block;font-size:14px;font-weight:300;color:var(--ink);margin-top:3px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mc-agent em{display:block;font-style:normal;font-family:var(--mono5);font-size:9.5px;
+  color:var(--mute);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mc-timer{text-align:right}
+.mc-timer b{display:block;font-family:var(--mono5);font-size:19px;font-weight:300;
+  color:var(--ink);margin-top:2px;font-variant-numeric:tabular-nums}
+.mc-timer em{font-style:normal;font-family:var(--mono5);font-size:8.5px;color:var(--faint)}
+
+.mc-state{display:flex;align-items:center;gap:8px;padding:7px 14px;border-radius:9px;
+  background:rgba(120,200,230,.06);box-shadow:var(--edge5)}
+.mc-state i{width:7px;height:7px;border-radius:50%;background:var(--mute);flex:0 0 auto}
+.mc-state b{font-family:var(--mono5);font-size:10px;letter-spacing:.2em;color:var(--mute)}
+.mc-state[data-tone='run'] i,.mc-state[data-tone='tool'] i,
+.mc-state[data-tone='think'] i,.mc-state[data-tone='check'] i{background:var(--cy);box-shadow:0 0 9px var(--cy)}
+.mc-state[data-tone='run'] b,.mc-state[data-tone='tool'] b,
+.mc-state[data-tone='think'] b,.mc-state[data-tone='check'] b{color:var(--cy)}
+.mc-state[data-tone='wait'] i{background:var(--amber);box-shadow:0 0 9px var(--amber)}
+.mc-state[data-tone='wait'] b{color:var(--amber)}
+.mc-state[data-tone='ok'] i{background:var(--ok5);box-shadow:0 0 9px var(--ok5)}
+.mc-state[data-tone='ok'] b{color:var(--ok5)}
+.mc-state[data-tone='err'] i{background:var(--err5);box-shadow:0 0 9px var(--err5)}
+.mc-state[data-tone='err'] b{color:var(--err5)}
+.mc-state[data-busy='1'] i{animation:mcPulse 1.5s ease-in-out infinite}
+@keyframes mcPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.72)}}
+
+.mc-bar{position:relative;height:3px;border-radius:2px;background:rgba(120,200,230,.1);
+  display:flex;align-items:center}
+.mc-bar[hidden]{display:none!important}
+.mc-bar i{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--cy),var(--ice));
+  box-shadow:0 0 10px -2px var(--cy);transition:width .5s cubic-bezier(.16,.9,.3,1)}
+.mc-bar span{position:absolute;right:0;top:-15px;font-family:var(--mono5);font-size:8.5px;color:var(--mute)}
+
+.mc-cols{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
+.mc-steps-zone,.mc-detail{display:flex;flex-direction:column;min-height:0;overflow-y:auto;
+  padding:11px 13px;border-radius:12px;background:var(--glass5);box-shadow:var(--edge5);
+  scrollbar-width:thin;scrollbar-color:rgba(56,223,255,.18) transparent}
+.mc-steps-zone::-webkit-scrollbar,.mc-detail::-webkit-scrollbar,
+.mc-hist::-webkit-scrollbar{width:6px}
+.mc-steps-zone::-webkit-scrollbar-thumb,.mc-detail::-webkit-scrollbar-thumb,
+.mc-hist::-webkit-scrollbar-thumb{background:rgba(56,223,255,.18);border-radius:3px}
+
+/* ------------------------------------------------------------- checklist */
+.mc-steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.mc-steps li{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:baseline;
+  padding:7px 8px;border-radius:7px;border-left:2px solid transparent}
+.mc-steps li i{font-style:normal;font-family:var(--mono5);font-size:9.5px;color:var(--faint);
+  font-variant-numeric:tabular-nums}
+.mc-steps li b{font-size:12px;font-weight:350;color:var(--mute);line-height:1.4}
+.mc-steps li em{font-style:normal;font-family:var(--mono5);font-size:8px;letter-spacing:.18em;color:var(--faint)}
+.mc-steps li[data-st='done'] b{color:var(--ink)}
+.mc-steps li[data-st='done'] em{color:var(--ok5)}
+.mc-steps li[data-st='run']{background:rgba(56,223,255,.09);border-left-color:var(--cy)}
+.mc-steps li[data-st='run'] b{color:var(--ink)}
+.mc-steps li[data-st='run'] em{color:var(--cy)}
+.mc-steps li[data-st='run'] i{color:var(--cy)}
+.mc-steps li[data-st='err']{background:rgba(255,91,110,.07);border-left-color:var(--err5)}
+.mc-steps li[data-st='err'] b{color:var(--ink)}
+.mc-steps li[data-st='err'] em{color:var(--err5)}
+
+/* ------------------------------------------------------------------ outil */
+.mc-tool{margin-bottom:13px}
+.mc-toolcard{border-radius:10px;padding:10px 12px;background:rgba(120,200,230,.05);
+  border-left:2px solid var(--faint)}
+.mc-toolcard[data-state='run']{border-left-color:var(--cy);background:rgba(56,223,255,.08)}
+.mc-toolcard[data-state='err']{border-left-color:var(--err5);background:rgba(255,91,110,.07)}
+.mc-toolcard[data-state='ok']{border-left-color:var(--ok5)}
+.mct-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.mct-head b{font-family:var(--mono5);font-size:12px;color:var(--ink);word-break:break-all}
+.mct-head em{margin-left:auto;font-style:normal;font-family:var(--mono5);font-size:8.5px;
+  letter-spacing:.12em;color:var(--mute)}
+.mct-args{display:grid;grid-template-columns:auto minmax(0,1fr);gap:3px 11px;margin:9px 0 0}
+.mct-args dt{font-family:var(--mono5);font-size:9px;color:var(--faint);letter-spacing:.08em}
+.mct-args dd{margin:0;font-family:var(--mono5);font-size:9.5px;color:var(--mute);
+  word-break:break-word;overflow-wrap:anywhere}
+
+/* --------------------------------------------------------------- fichiers */
+.mc-files{display:flex;flex-direction:column;gap:3px;margin-bottom:13px}
+.mc-file{display:flex;align-items:baseline;gap:9px;padding:5px 8px;border-radius:6px;
+  background:rgba(120,200,230,.04)}
+.mc-file b{flex:1;min-width:0;font-family:var(--mono5);font-size:9.5px;font-weight:400;color:var(--mute);
+  direction:rtl;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mc-file em{font-style:normal;font-family:var(--mono5);font-size:8px;letter-spacing:.14em;color:var(--faint)}
+.mc-file[data-act='modified'] em,.mc-file[data-act='saved'] em,
+.mc-file[data-act='created'] em{color:var(--amber)}
+.mc-file[data-act='deleted'] em{color:var(--err5)}
+
+/* ----------------------------------------------------------------- sortie */
+.mc-out{display:flex;flex-direction:column;gap:7px}
+.mc-outbox{border-radius:9px;padding:8px 11px;background:rgba(120,200,230,.04);
+  border-left:2px solid var(--faint)}
+.mc-outbox[data-tone='ok']{border-left-color:var(--ok5)}
+.mc-outbox[data-tone='err']{border-left-color:var(--err5);background:rgba(255,91,110,.06)}
+.mc-outbox span{font-family:var(--mono5);font-size:8px;letter-spacing:.2em;color:var(--faint)}
+.mc-outbox pre{margin:5px 0 0;font-family:var(--mono5);font-size:10px;line-height:1.6;
+  color:var(--mute);white-space:pre-wrap;word-break:break-word;max-height:150px;overflow-y:auto}
+.mc-outbox[data-tone='err'] pre{color:#ffc3ca}
+
+/* ------------------------------------------------------------- historique */
+.mc-hist-zone{display:flex;flex-direction:column;min-height:96px;max-height:30%;
+  padding:10px 13px;border-radius:12px;background:var(--glass5);box-shadow:var(--edge5)}
+.mc-hist{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:1px;
+  scrollbar-width:thin;scrollbar-color:rgba(56,223,255,.18) transparent}
+.mc-hrow{display:grid;grid-template-columns:auto 68px minmax(0,1fr) auto;gap:10px;align-items:baseline;
+  padding:4px 6px;border-radius:5px;font-family:var(--mono5);font-size:9.5px}
+.mc-hrow:hover{background:rgba(120,200,230,.05)}
+.mc-hrow i{font-style:normal;color:var(--faint);font-variant-numeric:tabular-nums}
+.mc-hrow u{text-decoration:none;font-size:8px;letter-spacing:.16em;color:var(--faint)}
+.mc-hrow b{font-weight:400;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mc-hrow em{font-style:normal;color:var(--faint);max-width:34%;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis}
+.mc-hrow[data-kind='tool'] u{color:var(--cy)}
+.mc-hrow[data-kind='tool'] b{color:var(--ink)}
+.mc-hrow[data-kind='tool_result'] u{color:var(--ok5)}
+.mc-hrow[data-kind='mission'] u{color:var(--violet)}
+.mc-hrow[data-kind='waiting'] u{color:var(--amber)}
+.mc-hrow[data-tone='err'] u,.mc-hrow[data-tone='err'] b{color:var(--err5)}
+
+/* Le bandeau de tache fait doublon avec le panneau ouvert (et le recouvrait) :
+   Mission Control dit la meme chose, en plus complet. */
+html[data-mc-open='1'] .v5-task,
+html[data-mc-open='1'] .v5-activity{display:none!important}
+
+/* ---------------------------------------- pastille « mission vivante » rail */
+.v5-rail button[data-badge]:not([data-badge=''])::after{content:attr(data-badge);
+  position:absolute;top:4px;right:4px;min-width:13px;height:13px;padding:0 3px;
+  border-radius:7px;background:var(--cy);color:#02141c;
+  font-family:var(--mono5);font-size:8px;line-height:13px;text-align:center;
+  box-shadow:0 0 9px -1px var(--cy)}
+
+/* ------------------------------------------------------------- responsive */
+@media (max-width:1180px){
+  .mc-cols{grid-template-columns:minmax(0,1fr)}
+  .mc-body{grid-template-columns:170px minmax(0,1fr)}
+}
+@media (max-width:900px){
+  .v5-mc{top:48px;bottom:150px}
+  .mc-body{grid-template-columns:minmax(0,1fr)}
+  .mc-side{display:none}
+  .mc-top{grid-template-columns:minmax(0,1fr) auto}
+  .mc-timer{grid-column:1/-1;text-align:left}
+}
+
+/* =========================================================== SUPERVISION V2
+   Santé des composants, filtres d'historique, diagnostic d'échec et REPLAY. */
+
+/* ------------------------------------------------------ santé (bandeau haut) */
+.mc-health{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-left:auto}
+.mc-hitem{display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border-radius:6px;
+  font-family:var(--mono5);font-size:8px;letter-spacing:.14em;background:rgba(120,200,230,.05)}
+.mc-hitem i{width:5px;height:5px;border-radius:50%;background:var(--faint);flex:0 0 auto}
+.mc-hitem b{font-weight:400;color:var(--mute)}
+.mc-hitem em{font-style:normal;color:var(--faint)}
+.mc-hitem[data-tone='ok'] i{background:var(--ok5);box-shadow:0 0 7px var(--ok5)}
+.mc-hitem[data-tone='ok'] em{color:var(--ok5)}
+.mc-hitem[data-tone='err'] i{background:var(--err5);box-shadow:0 0 7px var(--err5)}
+.mc-hitem[data-tone='err'] em{color:var(--err5)}
+.mc-hitem[data-tone='wait'] i{background:var(--amber);box-shadow:0 0 7px var(--amber)}
+.mc-hitem[data-tone='wait'] em{color:var(--amber)}
+/* UNKNOWN reste GRIS : jamais de vert pour un composant non sondé. */
+.mc-hitem[data-tone='unknown'] i{background:var(--faint)}
+.mc-hitem[data-tone='unknown'] em{color:var(--mute)}
+.mc-live{margin-left:0}
+
+/* ------------------------------------------------------------- filtres */
+.mc-filters{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:8px 8px 6px;
+  box-shadow:inset 0 -1px 0 rgba(120,200,230,.08)}
+.mc-filter{display:flex;align-items:baseline;justify-content:center;gap:5px;cursor:pointer;
+  border:0;border-radius:7px;padding:6px 5px;background:rgba(120,200,230,.04);
+  font-family:var(--mono5);transition:background .18s,color .18s}
+.mc-filter b{font-size:8px;font-weight:400;letter-spacing:.14em;color:var(--mute)}
+.mc-filter em{font-style:normal;font-size:8px;color:var(--faint)}
+.mc-filter:hover{background:rgba(56,223,255,.1)}
+.mc-filter[data-on='1']{background:rgba(56,223,255,.16)}
+.mc-filter[data-on='1'] b{color:var(--cy)}
+.mc-filter[data-on='1'] em{color:var(--ice)}
+
+/* --------------------------------------------------- diagnostic d'échec */
+.mc-fail{border-radius:12px;padding:11px 14px;background:rgba(255,91,110,.07);
+  box-shadow:inset 0 0 0 1px rgba(255,91,110,.22)}
+.mc-fail[hidden]{display:none!important}
+.mc-fail-head{display:flex;align-items:center;gap:12px;margin-bottom:9px}
+.mc-fail-head span{font-family:var(--mono5);font-size:8px;letter-spacing:.24em;color:var(--err5)}
+.mc-copy{margin-left:auto;cursor:pointer;border:0;border-radius:7px;padding:6px 12px;
+  font-family:var(--mono5);font-size:8.5px;letter-spacing:.16em;color:var(--ink);
+  background:rgba(255,91,110,.18);transition:background .18s}
+.mc-copy:hover{background:rgba(255,91,110,.3)}
+.mc-fail-grid{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 14px;margin:0}
+.mc-fail-grid dt{font-family:var(--mono5);font-size:8.5px;letter-spacing:.1em;color:var(--faint)}
+.mc-fail-grid dd{margin:0;font-family:var(--mono5);font-size:10px;color:#ffc3ca;
+  word-break:break-word;overflow-wrap:anywhere}
+.mc-copybox{width:100%;height:120px;margin-top:9px;border-radius:8px;resize:vertical;
+  border:1px solid rgba(255,91,110,.3);background:rgba(2,8,14,.9);color:var(--mute);
+  font-family:var(--mono5);font-size:10px;padding:8px}
+
+/* ---------------------------------------------------------------- REPLAY */
+.mc-replay{display:flex;align-items:center;gap:7px;margin-left:auto}
+.mc-rbtn{cursor:pointer;border:0;border-radius:6px;padding:4px 10px;font-family:var(--mono5);
+  font-size:8px;letter-spacing:.16em;color:var(--mute);background:rgba(120,200,230,.07);
+  transition:background .18s,color .18s}
+.mc-rbtn:hover{background:rgba(56,223,255,.16);color:var(--ink)}
+.mc-rbtn[hidden]{display:none!important}
+.mc-speeds{display:inline-flex;gap:2px}
+.mc-speed{cursor:pointer;border:0;border-radius:5px;padding:4px 7px;font-family:var(--mono5);
+  font-size:8px;color:var(--faint);background:transparent;transition:background .18s,color .18s}
+.mc-speed:hover{color:var(--ice)}
+.mc-speed[data-on='1']{background:rgba(56,223,255,.16);color:var(--cy)}
+.mc-rpos{font-family:var(--mono5);font-size:9px;color:var(--cy);font-variant-numeric:tabular-nums}
+
+/* Le mode REPLAY se voit : on ne doit jamais confondre une relecture avec le
+   direct. Liseré violet + mention explicite dans le titre de la mission. */
+.v5-mc[data-replay='1']{box-shadow:inset 0 0 0 1px rgba(155,140,255,.4),
+  0 30px 80px -30px rgba(0,0,0,.9)}
+.v5-mc[data-replay='1'] .mc-kick{color:var(--violet)}
+.v5-mc[data-replay='1'] .mc-head h2{color:var(--violet)}
+.v5-mc[data-replay='1'] #mcHistTitle{color:var(--violet)}
+
+@media (max-width:1180px){
+  .mc-health .mc-hitem b{display:none}
+}
+@media (max-width:900px){
+  .mc-health{display:none}
+  .mc-filters{grid-template-columns:repeat(4,1fr)}
+}
+
+/* ============================================================== UX V3
+   Bandeau de faits, timeline à glyphes, inspecteur d'outil, FILES groupés,
+   recherche locale, barre de replay, mode compact, responsive. */
+
+/* ------------------------------------------------- en-tête : bouton compact */
+.mc-mini{border:0;background:none;color:var(--faint);font-size:12px;cursor:pointer;
+  padding:4px 6px;line-height:1}
+.mc-mini:hover{color:var(--cy)}
+
+/* ------------------------------------------------------- LIVE / HISTORIQUE */
+.mc-modes{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:8px 8px 0}
+.mc-mode{cursor:pointer;border:0;border-radius:7px;padding:7px 5px;background:rgba(120,200,230,.04);
+  font-family:var(--mono5);font-size:8.5px;letter-spacing:.18em;color:var(--mute);
+  transition:background .18s,color .18s}
+.mc-mode:hover{background:rgba(56,223,255,.1)}
+.mc-mode[data-on='1']{background:rgba(56,223,255,.18);color:var(--cy)}
+
+/* ------------------------------------------------------- recherche locale */
+.mc-search{position:relative;padding:8px 8px 0}
+.mc-search input{width:100%;box-sizing:border-box;border:0;border-radius:7px;
+  padding:7px 26px 7px 10px;background:rgba(2,10,17,.7);color:var(--ink);
+  font-family:var(--mono5);font-size:10px;
+  box-shadow:inset 0 0 0 1px rgba(120,200,230,.12);outline:none}
+.mc-search input::placeholder{color:var(--faint)}
+.mc-search input:focus{box-shadow:inset 0 0 0 1px rgba(56,223,255,.45)}
+.mc-search input::-webkit-search-cancel-button{display:none}
+.mc-search-x{position:absolute;right:13px;top:13px;border:0;background:none;cursor:pointer;
+  color:var(--faint);font-size:10px;padding:2px}
+.mc-search-x:hover{color:var(--cy)}
+.mc-search-x[hidden]{display:none!important}
+.mc-filters[hidden]{display:none!important}
+.mc-listmeta{padding:6px 10px 8px;font-family:var(--mono5);font-size:8px;
+  letter-spacing:.12em;color:var(--faint);text-align:right}
+
+/* --------------------------------------------------- bandeau de faits */
+.mc-facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) minmax(0,1.4fr);gap:8px}
+.mc-fact{min-width:0;padding:9px 12px;border-radius:10px;background:var(--glass5);
+  box-shadow:var(--edge5)}
+.mc-fact .k{display:block;font-family:var(--mono5);font-size:7.5px;letter-spacing:.24em;
+  color:var(--faint)}
+.mc-fact b{display:block;margin-top:3px;font-size:12.5px;font-weight:350;color:var(--ink);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mc-fact em{display:block;margin-top:2px;font-style:normal;font-family:var(--mono5);
+  font-size:8.5px;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#mcFactTool b{font-family:var(--mono5);font-size:11px;color:var(--cy)}
+#mcFactFiles b{font-family:var(--mono5)}
+
+/* --------------------------------------------- timeline : glyphes d'état */
+.mc-steps li{grid-template-columns:auto auto minmax(0,1fr) auto}
+.mc-steps li u{text-decoration:none;font-family:var(--mono5);font-size:11px;
+  color:var(--faint);line-height:1}
+.mc-steps li[data-st='done'] u{color:var(--ok5)}
+.mc-steps li[data-st='err'] u{color:var(--err5)}
+/* L'étape active est la seule pastille pleine et lumineuse de la colonne :
+   on doit la trouver sans lire. Pulsation lente, jamais agressive. */
+.mc-steps li[data-st='run'] u{color:var(--cy);text-shadow:0 0 9px rgba(56,223,255,.75);
+  animation:mcStep 2.4s ease-in-out infinite}
+@keyframes mcStep{0%,100%{opacity:1}50%{opacity:.5}}
+@media (prefers-reduced-motion:reduce){
+  .mc-steps li[data-st='run'] u{animation:none}
+}
+
+/* ------------------------------------------------------- FILES groupés */
+.mc-fgroup{display:flex;align-items:baseline;gap:8px;margin:8px 0 3px;
+  font-family:var(--mono5);font-size:7.5px;letter-spacing:.22em;color:var(--faint)}
+.mc-fgroup:first-child{margin-top:0}
+.mc-fgroup em{font-style:normal;color:var(--mute)}
+button.mc-file{width:100%;text-align:left;border:0;cursor:pointer;font:inherit}
+button.mc-file:hover{background:rgba(56,223,255,.12)}
+
+/* --------------------------------------------- échec : le message d'abord */
+.mc-fail-msg{margin:0 0 9px;font-size:13px;line-height:1.5;color:#ffd7db;
+  word-break:break-word;overflow-wrap:anywhere}
+
+/* ------------------------------------------------- budget vertical du corps
+   Sur une mission en ÉCHEC, le bloc d'erreur s'ajoute à la pile : sans ces
+   bornes, les colonnes ÉTAPES/OUTIL tombaient à ~99 px et n'affichaient plus
+   que deux étapes sur quatre. On plafonne donc ce qui peut l'être (erreur,
+   journal) et on garantit un plancher à ce qu'on est venu lire. */
+.mc-fail{flex:0 0 auto;max-height:168px;overflow-y:auto;
+  scrollbar-width:thin;scrollbar-color:rgba(255,91,110,.3) transparent}
+.mc-fail::-webkit-scrollbar{width:6px}
+.mc-fail::-webkit-scrollbar-thumb{background:rgba(255,91,110,.3);border-radius:3px}
+.mc-cols{flex:1 1 auto;min-height:210px}
+.mc-hist-zone{flex:0 1 auto}
+.mc-facts{flex:0 0 auto}
+.mc-top{flex:0 0 auto}
+
+/* --------------------------------------------------- barre de replay */
+.mc-rtrack{display:flex;align-items:center;gap:10px;padding:6px 0 2px}
+.mc-rtrack[hidden]{display:none!important}
+.mc-rline{flex:1;height:3px;border-radius:2px;background:rgba(155,140,255,.16)}
+.mc-rline i{display:block;height:100%;border-radius:2px;background:var(--violet);
+  box-shadow:0 0 10px -2px var(--violet);transition:width .2s linear}
+.mc-rnow{max-width:52%;font-family:var(--mono5);font-size:8.5px;color:var(--violet);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* Événement en cours de relecture, repéré dans le journal. */
+.mc-hrow[data-now='1']{background:rgba(155,140,255,.14);border-radius:5px}
+.mc-hrow[data-now='1'] b{color:var(--ink)}
+.mc-hrow[data-log-index]{cursor:pointer}
+.mc-hrow[data-log-index]:hover{background:rgba(56,223,255,.1)}
+
+/* ------------------------------------------------------- inspecteur outil */
+.mc-inspect{position:absolute;right:16px;top:62px;bottom:16px;width:min(360px,42%);
+  z-index:3;display:flex;flex-direction:column;border-radius:12px;
+  background:linear-gradient(180deg,rgba(6,20,31,.98),rgba(2,9,15,.98));
+  box-shadow:inset 0 0 0 1px rgba(120,200,230,.16),-18px 0 50px -24px rgba(0,0,0,.95)}
+.mc-inspect[hidden]{display:none!important}
+.mc-inspect header{display:flex;align-items:center;gap:10px;padding:11px 13px;
+  box-shadow:inset 0 -1px 0 rgba(120,200,230,.1)}
+.mc-inspect header span{font-family:var(--mono5);font-size:8px;letter-spacing:.24em;color:var(--cy)}
+.mc-inspect header .mc-close{margin-left:auto}
+.mc-inspect-body{flex:1;min-height:0;overflow-y:auto;padding:12px 13px;
+  scrollbar-width:thin;scrollbar-color:rgba(56,223,255,.18) transparent}
+.mc-inspect-body::-webkit-scrollbar{width:6px}
+.mc-inspect-body::-webkit-scrollbar-thumb{background:rgba(56,223,255,.18);border-radius:3px}
+.mci-grid{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;margin:0 0 14px}
+.mci-grid dt{font-family:var(--mono5);font-size:8.5px;letter-spacing:.1em;color:var(--faint)}
+.mci-grid dd{margin:0;font-family:var(--mono5);font-size:10px;color:var(--ink);
+  word-break:break-word;overflow-wrap:anywhere}
+.mci-sec{margin-bottom:13px}
+.mci-sec>span{display:block;margin-bottom:6px;font-family:var(--mono5);font-size:7.5px;
+  letter-spacing:.24em;color:var(--faint)}
+.mci-sec[data-tone='err']>span{color:var(--err5)}
+.mci-sec pre{margin:0;padding:8px 10px;border-radius:8px;background:rgba(120,200,230,.05);
+  font-family:var(--mono5);font-size:9.5px;line-height:1.6;color:var(--mute);
+  white-space:pre-wrap;word-break:break-word;max-height:190px;overflow-y:auto}
+.mci-sec[data-tone='err'] pre{background:rgba(255,91,110,.08);color:#ffc3ca}
+.mci-args{display:grid;grid-template-columns:auto minmax(0,1fr);gap:3px 11px;margin:0;
+  padding:8px 10px;border-radius:8px;background:rgba(120,200,230,.05)}
+.mci-args dt{font-family:var(--mono5);font-size:9px;color:var(--faint)}
+.mci-args dd{margin:0;font-family:var(--mono5);font-size:9.5px;color:var(--mute);
+  word-break:break-word;overflow-wrap:anywhere}
+
+/* ============================================================ MODE COMPACT
+   Mission Control se réduit à une barre : agent, mission, statut, outil,
+   durée. Assez pour savoir où en est JARVIS pendant qu'on travaille ailleurs,
+   assez discret pour ne pas gêner. On masque des blocs — on ne simplifie
+   jamais la donnée elle-même. */
+.v5-mc[data-compact='1']{left:auto;right:var(--v5right);top:auto;
+  bottom:calc(22px + var(--cmdh,56px) + 14px);
+  width:min(560px,60vw);height:auto;padding:10px 14px;gap:8px}
+.v5-mc[data-compact='1'] .mc-body{display:block;min-height:0}
+.v5-mc[data-compact='1'] .mc-side,
+.v5-mc[data-compact='1'] .mc-health,
+.v5-mc[data-compact='1'] .mc-bar,
+.v5-mc[data-compact='1'] .mc-fail,
+.v5-mc[data-compact='1'] .mc-cols,
+.v5-mc[data-compact='1'] .mc-hist-zone,
+.v5-mc[data-compact='1'] .mc-inspect,
+.v5-mc[data-compact='1'] #mcFactStep,
+.v5-mc[data-compact='1'] #mcFactFiles,
+.v5-mc[data-compact='1'] #mcFactLast{display:none!important}
+.v5-mc[data-compact='1'] .mc-head{padding-bottom:7px}
+.v5-mc[data-compact='1'] .mc-head h2{font-size:13px;max-width:34vw}
+.v5-mc[data-compact='1'] .mc-main{gap:8px}
+.v5-mc[data-compact='1'] .mc-top{grid-template-columns:minmax(0,1fr) auto auto;
+  padding:8px 11px;gap:11px}
+.v5-mc[data-compact='1'] .mc-agent b{font-size:12px}
+.v5-mc[data-compact='1'] .mc-timer b{font-size:15px}
+.v5-mc[data-compact='1'] .mc-facts{grid-template-columns:minmax(0,1fr)}
+.v5-mc[data-compact='1'] .mc-empty{padding:8px 0;font-size:10px}
+/* En compact, le panneau ne couvre plus rien : le bandeau de tâche peut
+   reprendre sa place, les deux coexistent sans se recouvrir. */
+html[data-mc-compact='1'] .v5-task{display:flex!important}
+
+/* ============================================================== RESPONSIVE */
+@media (max-width:1500px){
+  .mc-facts{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .mc-inspect{width:min(340px,48%)}
+}
+@media (max-width:1180px){
+  .mc-inspect{width:auto;left:16px}
+  .v5-mc[data-compact='1']{width:auto;left:var(--v5rail)}
+}
+@media (max-width:900px){
+  .mc-facts{grid-template-columns:minmax(0,1fr)}
+  .mc-fact.wide{display:none}
+  .mc-modes,.mc-search{display:none}
+}
+/* Fenêtre courte : le journal et les faits ne doivent pas écraser l'essentiel
+   — les étapes et l'outil en cours restent visibles jusqu'au bout. */
+@media (max-height:760px){
+  .mc-fact b{font-size:11px}
+  .mc-hist-zone{max-height:22%;min-height:74px}
+}
+/* Une fenetre BASSE gagne a etaler les faits sur une ligne — mais seulement
+   si elle est aussi assez LARGE. Sans cette condition, une petite fenetre
+   heritait de 4 colonnes de 179px et tronquait tout. */
+@media (max-height:760px) and (min-width:1181px){
+  .mc-facts{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+@media (max-height:620px){
+  .mc-facts{display:none}
+  .mc-hist-zone{display:none}
+}

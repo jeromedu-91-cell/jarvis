@@ -440,6 +440,49 @@ CREATE TABLE IF NOT EXISTS blog_publication_events (
 CREATE INDEX IF NOT EXISTS idx_blog_pub_events_article
   ON blog_publication_events(article_id, kind, status);
 CREATE INDEX IF NOT EXISTS idx_blog_pub_events_slug ON blog_publication_events(slug);
+
+-- Mission Control V1 (porté depuis la branche Windows). Historique de
+-- SUPERVISION : qui a fait quoi, avec quels outils, en combien de temps.
+-- Les gros payloads n'y entrent jamais (aperçus tronqués seulement).
+CREATE TABLE IF NOT EXISTS missions (
+  id TEXT PRIMARY KEY,
+  name TEXT DEFAULT '',
+  kind TEXT DEFAULT 'chat',
+  agent TEXT DEFAULT 'jarvis',
+  status TEXT DEFAULT 'RUNNING',
+  conversation_id TEXT DEFAULT '',
+  created_at REAL,
+  started_at REAL,
+  completed_at REAL,
+  duration REAL DEFAULT 0,
+  tools TEXT DEFAULT '[]',
+  tool_calls INTEGER DEFAULT 0,
+  steps_total INTEGER DEFAULT 0,
+  steps_done INTEGER DEFAULT 0,
+  steps TEXT DEFAULT '[]',
+  files TEXT DEFAULT '[]',
+  error TEXT DEFAULT '',
+  result TEXT DEFAULT '',
+  failed_step TEXT DEFAULT '',
+  failed_tool TEXT DEFAULT '',
+  note TEXT DEFAULT ''
+);
+CREATE INDEX IF NOT EXISTS idx_missions_status ON missions(status, created_at);
+
+CREATE TABLE IF NOT EXISTS mission_events (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  mission_id TEXT NOT NULL,
+  ts REAL,
+  offset_ms INTEGER DEFAULT 0,
+  kind TEXT DEFAULT 'log',
+  label TEXT DEFAULT '',
+  state TEXT DEFAULT '',
+  tool TEXT DEFAULT '',
+  ok INTEGER,
+  duration_ms INTEGER DEFAULT 0,
+  detail TEXT DEFAULT ''
+);
+CREATE INDEX IF NOT EXISTS idx_mission_events_mission ON mission_events(mission_id, id);
 """
 
 

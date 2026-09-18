@@ -41,6 +41,7 @@ from .document_store import DocumentStore
 from .imagegen import ImageGenManager
 from .llm import LLMManager
 from .memory import MemoryManager
+from .mission_control import MissionControl
 from .monitor import SystemMonitor
 from .orchestrator import Orchestrator
 from .permissions import PermissionManager
@@ -86,6 +87,10 @@ class JarvisCore:
         self.memory = MemoryManager(self.db, self.events, self.settings)
         self.conversations = ConversationManager(self.db, self.events, self.settings)
         self.tasks = TaskManager(self.db, self.events, self.settings)
+        # Mission Control : observateur passif du bus d'événements — il ne
+        # pilote rien, il agrège l'état réel des missions pour l'écran de
+        # supervision (et persiste l'historique consultable après redémarrage).
+        self.missions = MissionControl(self.events, db=self.db)
         self.calendar = CalendarManager(self.db, self.events)
         self.agents = AgentManager(self.db, self.events)
         self.llm = LLMManager(self.connectors, self.vault, self.settings, self.events)
@@ -254,6 +259,8 @@ class JarvisCore:
                 self.permissions.cleanup()
                 self.audit.prune(int(self.settings.get("security", "audit_retention_days", 90)))
                 self.tasks.prune(int(self.settings.get("automation", "task_retention_days", 30)))
+                if self.missions.store:
+                    self.missions.store.prune()
                 self.sessions.prune()
                 self.attachments.cleanup()
                 self.llm.invalidate()

@@ -136,6 +136,50 @@ def api_health(req):
 
 
 # ---------------------------------------------------------------------------
+# Mission Control V1 — contrat spatial_mission_control.js. Tout vient de
+# `CORE.missions` (observateur du bus) : aucune donnée n'est fabriquée ici.
+# ---------------------------------------------------------------------------
+@router.get("/api/missions")
+def api_missions(req):
+    return _ok(CORE.missions.snapshot())
+
+
+@router.get("/api/missions/history")
+def api_missions_history(req):
+    q = req["query"]
+    return _ok(CORE.missions.history(
+        status=q.get("status", ["ALL"])[0],
+        limit=int(q.get("limit", ["40"])[0]),
+        offset=int(q.get("offset", ["0"])[0]),
+    ))
+
+
+@router.get("/api/missions/health")
+def api_missions_health(req):
+    from .mission_control import health_report
+
+    return _ok(health_report(CORE))
+
+
+@router.get("/api/missions/<mission_id>")
+def api_missions_detail(req, mission_id):
+    mission = CORE.missions.detail(mission_id)
+    if not mission:
+        return _err("Mission inconnue : " + mission_id, 404)
+    return _ok({"mission": mission})
+
+
+@router.get("/api/missions/<mission_id>/timeline")
+def api_missions_timeline(req, mission_id):
+    return _ok({"timeline": CORE.missions.timeline(mission_id)})
+
+
+@router.get("/api/missions/<mission_id>/diagnostic")
+def api_missions_diagnostic(req, mission_id):
+    return _ok({"diagnostic": CORE.missions.diagnostic(mission_id)})
+
+
+# ---------------------------------------------------------------------------
 # Self Upgrade V1
 # ---------------------------------------------------------------------------
 @router.get("/api/self-upgrade/build-id")

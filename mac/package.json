@@ -1,0 +1,16 @@
+{
+  "name": "jarvis-frontend-tests",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Harnais de tests de l'interface JARVIS. Le produit est servi en JavaScript natif par jarvis/server.py — il n'y a ni bundler ni build : ce package.json n'existe QUE pour exécuter les tests.",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:mission-control": "vitest run tests/frontend/mission_control"
+  },
+  "devDependencies": {
+    "jsdom": "^25.0.1",
+    "vitest": "^2.1.9"
+  }
+}

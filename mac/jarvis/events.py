@@ -76,6 +76,8 @@ EVENT_TYPES = {
     "coding.started", "coding.completed",
     "deploy.started", "deploy.completed",
     "verification.started", "verification.completed",
+    # Mission Control V1 — contrat temps réel avec spatial_mission_control.js.
+    "mission.started", "mission.update", "mission.completed", "mission.failed",
     # Self Upgrade V1 — contrat temps réel avec la page Self Upgrades.
     "upgrade.started", "upgrade.progress", "upgrade.log", "upgrade.plan_ready",
     "upgrade.workspace_ready", "upgrade.building", "upgrade.testing", "upgrade.candidate",
